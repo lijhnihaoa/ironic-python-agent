@@ -1581,8 +1581,8 @@ class GenericHardwareManager(HardwareManager):
                 root_device_hints = (
                     cached_node['instance_info'].get('root_device')
                     or cached_node['properties'].get('root_device'))
-            LOG.debug('Looking for a device matching root hints %s',
-                      root_device_hints)
+            LOG.debug('Looking for a device matching root hints %s, cached_node %s',
+                      root_device_hints, cached_node)
             block_devices = self.list_block_devices_check_skip_list(
                 cached_node)
         else:
@@ -1610,6 +1610,15 @@ class GenericHardwareManager(HardwareManager):
                     "deployment using these hints %s" % root_device_hints)
 
             dev_name = device['name']
+
+        # move os disk，then mkfs.ext4
+        properties = cached_node.get('properties')
+        if properties and properties.get('is_format'):
+            disk_block_devices = list_all_block_devices()
+            for disk_device in disk_block_devices:
+                if disk_device.name == dev_name:
+                    continue
+                il_utils.mkfs('ext4', device.name)
 
         LOG.info('Picked root device %(dev)s for node %(node)s based on '
                  'root device hints %(hints)s',
