@@ -1619,7 +1619,7 @@ class GenericHardwareManager(HardwareManager):
                     for disk_device in disk_block_devices:
                         if disk_device.name == dev_name:
                             continue
-                        il_utils.mkfs('ext4', device.name)
+                        il_utils.mkfs('ext4', disk_device.name)
 
         LOG.info('Picked root device %(dev)s for node %(node)s based on '
                  'root device hints %(hints)s',
