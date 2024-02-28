@@ -1262,7 +1262,7 @@ class GenericHardwareManager(HardwareManager):
     def evaluate_hardware_support(self):
         # Do some initialization before we declare ourself ready
         _check_for_iscsi()
-        _md_scan_and_assemble()
+        #_md_scan_and_assemble()
         _load_ipmi_modules()
         global MULTIPATH_ENABLED
         if MULTIPATH_ENABLED is None:
