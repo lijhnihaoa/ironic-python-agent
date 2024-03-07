@@ -17,10 +17,12 @@ import os
 import re
 import tempfile
 import time
+import json
 from urllib import parse as urlparse
 
 from ironic_lib import disk_utils
 from ironic_lib import exception
+from ironic_lib import utils as il_utils
 from oslo_concurrency import processutils
 from oslo_config import cfg
 from oslo_log import log
@@ -886,6 +888,27 @@ class StandbyExtension(base.BaseAgentExtension):
                         'The hexdump tool may be missing in IPA: %s', e)
         else:
             self.partition_uuids['root uuid'] = root_uuid
+
+
+    @base.async_command('format_data_devices')
+    def format_data_devices(self):
+        LOG.debug("format_data_devices")
+        cached_node = hardware.get_cached_node()
+        dev_name = hardware.dispatch_to_managers('get_os_install_device',
+                                               permit_refresh=True)
+        if cached_node is not None:
+            metadata = cached_node['instance_info'].get('metadata')
+            if metadata is not None and isinstance(metadata, str):
+                metadata = json.loads(metadata)
+                if metadata.get('format_data_disk') == 'True':
+                    disk_block_devices = hardware.list_all_block_devices()
+                    for disk_device in disk_block_devices:
+                        if disk_device.name == dev_name:
+                            continue
+                        LOG.debug(f'format data devices: {disk_device.name}')
+                        il_utils.mkfs('ext4', disk_device.name)
+
+
 
     @base.async_command('prepare_image', _validate_image_info)
     def prepare_image(self, image_info, configdrive=None):

@@ -1610,16 +1610,6 @@ class GenericHardwareManager(HardwareManager):
                     "deployment using these hints %s" % root_device_hints)
 
             dev_name = device['name']
-        if cached_node is not None:
-            metadata = cached_node['instance_info'].get('metadata')
-            if metadata is not None and isinstance(metadata, str):
-                metadata = json.loads(metadata)
-                if metadata.get('format_data_disk') == 'True':
-                    disk_block_devices = list_all_block_devices()
-                    for disk_device in disk_block_devices:
-                        if disk_device.name == dev_name:
-                            continue
-                        il_utils.mkfs('ext4', disk_device.name)
 
         LOG.info('Picked root device %(dev)s for node %(node)s based on '
                  'root device hints %(hints)s',
@@ -3080,6 +3070,7 @@ class GenericHardwareManager(HardwareManager):
                             of the configdrive. Optional, defaults to None.
         """
         ext = ext_base.get_extension('standby')
+        ext.format_data_devices()
         cmd = ext.prepare_image(image_info=image_info, configdrive=configdrive)
         # The result is asynchronous, wait here.
         return cmd.wait()
