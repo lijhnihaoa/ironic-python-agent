@@ -3070,9 +3070,11 @@ class GenericHardwareManager(HardwareManager):
                             of the configdrive. Optional, defaults to None.
         """
         ext = ext_base.get_extension('standby')
-        ext.format_data_devices()
+        cmd_list = ext.format_data_devices()
         cmd = ext.prepare_image(image_info=image_info, configdrive=configdrive)
         # The result is asynchronous, wait here.
+        for command in cmd_list:
+            command.wait()
         return cmd.wait()
 
     def generate_tls_certificate(self, ip_address):

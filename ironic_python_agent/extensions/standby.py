@@ -891,11 +891,19 @@ class StandbyExtension(base.BaseAgentExtension):
 
 
     @base.async_command('format_data_devices')
+    def mkfs(self, name, type='ext4'):
+        try:
+            il_utils.mkfs('ext4', name)
+        except Exception as e:
+            raise errors.DeploymentError(f'disk format failed: {name},Error: {e}')
+        return ""
+
     def format_data_devices(self):
-        LOG.debug("format_data_devices")
+        LOG.debug("format data devices")
         cached_node = hardware.get_cached_node()
         dev_name = hardware.dispatch_to_managers('get_os_install_device',
                                                permit_refresh=True)
+        cmd_list = []
         if cached_node is not None:
             metadata = cached_node['instance_info'].get('metadata')
             if metadata is not None and isinstance(metadata, str):
@@ -906,9 +914,9 @@ class StandbyExtension(base.BaseAgentExtension):
                         if disk_device.name == dev_name:
                             continue
                         LOG.debug(f'format data devices: {disk_device.name}')
-                        il_utils.mkfs('ext4', disk_device.name)
-
-
+                        cmd = self.mkfs(disk_device.name)
+                        cmd_list.append(cmd)
+        return cmd_list
 
     @base.async_command('prepare_image', _validate_image_info)
     def prepare_image(self, image_info, configdrive=None):
