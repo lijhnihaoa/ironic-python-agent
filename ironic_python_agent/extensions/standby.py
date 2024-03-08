@@ -890,7 +890,7 @@ class StandbyExtension(base.BaseAgentExtension):
             self.partition_uuids['root uuid'] = root_uuid
 
 
-    @base.async_command('format_data_devices')
+    @base.async_command('mkfs')
     def mkfs(self, name):
         try:
             il_utils.mkfs('ext4', name)
