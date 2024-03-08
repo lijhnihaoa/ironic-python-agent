@@ -903,6 +903,7 @@ class StandbyExtension(base.BaseAgentExtension):
         cached_node = hardware.get_cached_node()
         dev_name = hardware.dispatch_to_managers('get_os_install_device',
                                                permit_refresh=True)
+        LOG.debug(f'os devices: {dev_name}, cached_node" {cached_node}')
         cmd_list = []
         if cached_node is not None:
             metadata = cached_node['instance_info'].get('metadata')
