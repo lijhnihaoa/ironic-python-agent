@@ -891,11 +891,11 @@ class StandbyExtension(base.BaseAgentExtension):
 
 
     @base.async_command('format_data_devices')
-    def mkfs(self, name, type='ext4'):
+    def mkfs(self, name):
         try:
             il_utils.mkfs('ext4', name)
         except Exception as e:
-            raise errors.DeploymentError(f'disk format failed: {name},Error: {e}')
+            raise errors.DeploymentError(f'disk format failed: {name},Error: {e}') from e
         return ""
 
     def format_data_devices(self):
