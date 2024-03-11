@@ -685,9 +685,6 @@ def _download_image(image_info):
               'reported': image_download.content_length})
 
 
-def _validate_data_disk(data_disk=None, **kwargs):
-        return
-
 def _validate_image_info(ext, image_info=None, **kwargs):
     """Validates the image_info dictionary has all required information.
 
@@ -893,7 +890,7 @@ class StandbyExtension(base.BaseAgentExtension):
             self.partition_uuids['root uuid'] = root_uuid
 
 
-    @base.async_command('mkfs', _validate_data_disk)
+    @base.async_command('mkfs')
     def mkfs(self, name):
         try:
             il_utils.mkfs('ext4', name)
@@ -918,7 +915,7 @@ class StandbyExtension(base.BaseAgentExtension):
                         if disk_device.name == dev_name:
                             continue
                         LOG.debug(f'format data devices: {disk_device.name}')
-                        cmd = self.mkfs(disk_device.name)
+                        cmd = self.mkfs(name=disk_device.name)
                         cmd_list.append(cmd)
         return cmd_list
 
