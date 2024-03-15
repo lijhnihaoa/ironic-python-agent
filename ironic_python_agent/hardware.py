@@ -3070,6 +3070,7 @@ class GenericHardwareManager(HardwareManager):
                             of the configdrive. Optional, defaults to None.
         """
         ext = ext_base.get_extension('standby')
+        ext.process_raid()
         cmd_list = ext.format_data_devices()
         cmd = ext.prepare_image(image_info=image_info, configdrive=configdrive)
         # The result is asynchronous, wait here.

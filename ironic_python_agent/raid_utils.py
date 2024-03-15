@@ -444,3 +444,27 @@ def find_esp_raid():
             dev[key] = val.strip()
         if dev.get('TYPE') == 'raid1' and dev.get('FSTYPE') == 'vfat':
             return '/dev/' + dev.get('NAME')
+
+def get_raid_disk(raid_device):
+    try:
+        mdadm_output = utils.execute('mdadm', '--detail', raid_device)
+    except Exception as e:
+        raise errors.DeploymentError(f'get raid physical disks failed : {raid_device},Error: {e}') from e
+    report = mdadm_output[0]
+    # 提取与 /dev/md127 相关的物理磁盘信息
+    return re.findall(r'/dev/\S+', report)[1:]
+
+
+
+def find_all_raid():
+    raid_devices = []
+    lsblk = utils.execute('lsblk', '-PbioNAME,TYPE')
+    report = lsblk[0]
+    for line in report.split('\n'):
+        dev = {}
+        vals = shlex.split(line)
+        for key, val in (v.split('=', 1) for v in vals):
+            dev[key] = val.strip()
+        if dev.get('TYPE') == 'raid1':
+            raid_devices.append(dev.get('NAME'))
+    return raid_devices

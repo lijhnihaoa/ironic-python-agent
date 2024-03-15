@@ -33,6 +33,7 @@ from ironic_python_agent.extensions import base
 from ironic_python_agent import hardware
 from ironic_python_agent import partition_utils
 from ironic_python_agent import utils
+from ironic_python_agent import raid_utils
 
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
@@ -888,6 +889,26 @@ class StandbyExtension(base.BaseAgentExtension):
                         'The hexdump tool may be missing in IPA: %s', e)
         else:
             self.partition_uuids['root uuid'] = root_uuid
+
+    def process_raid(self):
+        LOG.debug("process raid")
+        cached_node = hardware.get_cached_node()
+
+        if cached_node is not None:
+            metadata = cached_node['instance_info'].get('metadata')
+            if metadata.get('soft_raid') in ['False', 'false']:
+                return
+            raid_devices = raid_utils.find_all_raid()
+            LOG.debug(f'find all raid : {raid_devices}')
+            try:
+                for raid_device in raid_devices:
+
+                    physical_disks = raid_utils.get_raid_disk(raid_device)
+                    il_utils.execute('mdadm', '--stop', raid_device)
+                    for disk in physical_disks:
+                        il_utils.execute('mdadm', '--zero-superblock', disk)
+            except Exception as e:
+                raise errors.DeploymentError(f'process_raid: {raid_device},Error: {e}') from e
 
 
     @base.async_command('mkfs')
