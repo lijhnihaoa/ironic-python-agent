@@ -896,19 +896,21 @@ class StandbyExtension(base.BaseAgentExtension):
 
         if cached_node is not None:
             metadata = cached_node['instance_info'].get('metadata')
-            if metadata.get('soft_raid') in ['False', 'false']:
-                return
-            raid_devices = raid_utils.find_all_raid()
-            LOG.debug(f'find all raid : {raid_devices}')
-            try:
-                for raid_device in raid_devices:
+            if metadata is not None and isinstance(metadata, str):
+                metadata = json.loads(metadata)
+                if metadata.get('soft_raid') in ['False', 'false']:
+                    return
+                raid_devices = raid_utils.find_all_raid()
+                LOG.debug(f'find all raid : {raid_devices}')
+                try:
+                    for raid_device in raid_devices:
 
-                    physical_disks = raid_utils.get_raid_disk(raid_device)
-                    il_utils.execute('mdadm', '--stop', raid_device)
-                    for disk in physical_disks:
-                        il_utils.execute('mdadm', '--zero-superblock', disk)
-            except Exception as e:
-                raise errors.DeploymentError(f'process_raid: {raid_device},Error: {e}') from e
+                        physical_disks = raid_utils.get_raid_disk(raid_device)
+                        il_utils.execute('mdadm', '--stop', raid_device)
+                        for disk in physical_disks:
+                            il_utils.execute('mdadm', '--zero-superblock', disk)
+                except Exception as e:
+                    raise errors.DeploymentError(f'process_raid: {raid_device},Error: {e}') from e
 
 
     @base.async_command('mkfs')
