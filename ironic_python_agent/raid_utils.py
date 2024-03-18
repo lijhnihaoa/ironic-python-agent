@@ -465,6 +465,6 @@ def find_all_raid():
         vals = shlex.split(line)
         for key, val in (v.split('=', 1) for v in vals):
             dev[key] = val.strip()
-        if dev.get('TYPE') == 'raid1':
+        if dev.get('TYPE').startswith('raid'):
             raid_devices.append(dev.get('NAME'))
     return raid_devices
