@@ -904,7 +904,6 @@ class StandbyExtension(base.BaseAgentExtension):
                 LOG.debug(f'find all raid : {raid_devices}')
                 try:
                     for raid_device in raid_devices:
-
                         physical_disks = raid_utils.get_raid_disk(raid_device)
                         il_utils.execute('mdadm', '--stop', raid_device)
                         for disk in physical_disks:

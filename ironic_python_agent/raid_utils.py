@@ -447,7 +447,12 @@ def find_esp_raid():
 
 def get_raid_disk(raid_device):
     try:
-        mdadm_output = utils.execute('mdadm', '--detail', '/dev/'+raid_device)
+        import os
+        raid_device_path = f'/dev/{raid_device}'
+        if os.path.exists(raid_device_path):
+            mdadm_output = utils.execute('mdadm', '--detail', '/dev/'+raid_device)
+        else:
+            return []
     except Exception as e:
         raise errors.DeploymentError(f'get raid physical disks failed : {raid_device},Error: {e}') from e
     report = mdadm_output[0]
